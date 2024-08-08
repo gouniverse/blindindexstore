@@ -14,14 +14,19 @@ func NewStore(opts NewStoreOptions) (*Store, error) {
 		db:                 opts.DB,
 		dbDriverName:       opts.DbDriverName,
 		debugEnabled:       opts.DebugEnabled,
+		transformer:        opts.Transformer,
 	}
 
 	if store.tableName == "" {
-		return nil, errors.New("vault store: vaultTableName is required")
+		return nil, errors.New("blind index store: TableName is required")
 	}
 
 	if store.db == nil {
-		return nil, errors.New("vault store: DB is required")
+		return nil, errors.New("blind index store: DB is required")
+	}
+
+	if store.transformer == nil {
+		return nil, errors.New("blind index store: Transformer is required")
 	}
 
 	if store.dbDriverName == "" {

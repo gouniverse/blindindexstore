@@ -22,6 +22,7 @@ type Store struct {
 	dbDriverName       string
 	automigrateEnabled bool
 	debugEnabled       bool
+	transformer        TransformerInterface
 }
 
 // AutoMigrate auto migrate
@@ -79,9 +80,12 @@ func (store *Store) Search(needle string, searchType string) (refIDs []string, e
 	return list, nil
 }
 
+// SearchValueCreate creates the record
+// Side effect! Transforms the value
 func (store *Store) SearchValueCreate(searchValue *SearchValue) error {
 	searchValue.SetCreatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC))
 	searchValue.SetUpdatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC))
+	searchValue.SetSearchValue(store.transformer.Transform(searchValue.SearchValue()))
 
 	data := searchValue.Data()
 
@@ -233,12 +237,14 @@ func (store *Store) SearchValueSoftDeleteByID(id string) error {
 	return store.SearchValueSoftDelete(searchValue)
 }
 
+// SearchValueUpdate updates the record
+// Side effect! Transforms the value, use with caution
 func (store *Store) SearchValueUpdate(searchValue *SearchValue) error {
 	if searchValue == nil {
 		return errors.New("order is nil")
 	}
 
-	// searchValue.SetUpdatedAt(carbon.Now(carbon.UTC).ToDateTimeString())
+	searchValue.SetUpdatedAt(carbon.Now(carbon.UTC).ToDateTimeString())
 
 	dataChanged := searchValue.DataChanged()
 
@@ -246,8 +252,13 @@ func (store *Store) SearchValueUpdate(searchValue *SearchValue) error {
 	delete(dataChanged, "hash") // Hash is not updateable
 	delete(dataChanged, "data") // Data is not updateable
 
-	if len(dataChanged) < 1 {
+	if len(dataChanged) < 2 {
 		return nil
+	}
+
+	if lo.HasKey(dataChanged, COLUMN_SEARCH_VALUE) {
+		searchValue.SetSearchValue(store.transformer.Transform(searchValue.SearchValue()))
+		dataChanged[COLUMN_SEARCH_VALUE] = searchValue.SearchValue()
 	}
 
 	sqlStr, params, errSql := goqu.Dialect(store.dbDriverName).
@@ -284,6 +295,7 @@ func (store *Store) searchValueQuery(options SearchValueQueryOptions) *goqu.Sele
 	}
 
 	if options.SearchValue != "" {
+		options.SearchValue = store.transformer.Transform(options.SearchValue)
 		if options.SearchType == SEARCH_TYPE_CONTAINS {
 			q = q.Where(goqu.C(COLUMN_SEARCH_VALUE).Like("%" + options.SearchValue + "%"))
 		} else if options.SearchType == SEARCH_TYPE_STARTS_WITH {

@@ -9,4 +9,5 @@ type NewStoreOptions struct {
 	DbDriverName       string
 	AutomigrateEnabled bool
 	DebugEnabled       bool
+	Transformer        TransformerInterface
 }

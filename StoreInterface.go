@@ -17,6 +17,7 @@ type SearchValueQueryOptions struct {
 	IDIn              string
 	SourceReferenceID string
 	SearchValue       string
+	SearchType        string
 	Offset            int
 	Limit             int
 	SortOrder         string

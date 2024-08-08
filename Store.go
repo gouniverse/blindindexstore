@@ -47,6 +47,38 @@ func (st *Store) EnableDebug(debug bool) {
 	st.debugEnabled = debug
 }
 
+func (store *Store) Search(needle string, searchType string) (refIDs []string, err error) {
+	q := store.searchValueQuery(SearchValueQueryOptions{
+		SearchValue: needle,
+		SearchType:  searchType,
+	})
+
+	sqlStr, _, errSql := q.Select().ToSQL()
+
+	if errSql != nil {
+		return refIDs, nil
+	}
+
+	if store.debugEnabled {
+		log.Println(sqlStr)
+	}
+
+	db := sb.NewDatabase(store.db, store.dbDriverName)
+	modelMaps, err := db.SelectToMapString(sqlStr)
+	if err != nil {
+		return refIDs, err
+	}
+
+	list := []string{}
+
+	lo.ForEach(modelMaps, func(modelMap map[string]string, index int) {
+		model := NewSearchValueFromExistingData(modelMap)
+		list = append(list, model.SourceReferenceID())
+	})
+
+	return list, nil
+}
+
 func (store *Store) SearchValueCreate(searchValue *SearchValue) error {
 	searchValue.SetCreatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC))
 	searchValue.SetUpdatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC))
@@ -94,7 +126,7 @@ func (store *Store) SearchValueDeleteByID(id string) error {
 	sqlStr, params, errSql := goqu.Dialect(store.dbDriverName).
 		Delete(store.tableName).
 		Prepared(true).
-		Where(goqu.C("id").Eq(id)).
+		Where(goqu.C(COLUMN_ID).Eq(id)).
 		ToSQL()
 
 	if errSql != nil {
@@ -252,7 +284,16 @@ func (store *Store) searchValueQuery(options SearchValueQueryOptions) *goqu.Sele
 	}
 
 	if options.SearchValue != "" {
-		q = q.Where(goqu.C(COLUMN_SEARCH_VALUE).Eq(options.SearchValue))
+		if options.SearchType == SEARCH_TYPE_CONTAINS {
+			q = q.Where(goqu.C(COLUMN_SEARCH_VALUE).Like("%" + options.SearchValue + "%"))
+		} else if options.SearchType == SEARCH_TYPE_STARTS_WITH {
+			q = q.Where(goqu.C(COLUMN_SEARCH_VALUE).Like(options.SearchValue + "%"))
+		} else if options.SearchType == SEARCH_TYPE_ENDS_WITH {
+			q = q.Where(goqu.C(COLUMN_SEARCH_VALUE).Like(options.SearchValue + "%"))
+		} else {
+			// default to strict search
+			q = q.Where(goqu.C(COLUMN_SEARCH_VALUE).Eq(options.SearchValue))
+		}
 	}
 
 	if !options.CountOnly {
@@ -265,7 +306,7 @@ func (store *Store) searchValueQuery(options SearchValueQueryOptions) *goqu.Sele
 		}
 	}
 
-	sortOrder := "desc"
+	sortOrder := sb.DESC
 	if options.SortOrder != "" {
 		sortOrder = options.SortOrder
 	}
@@ -279,7 +320,7 @@ func (store *Store) searchValueQuery(options SearchValueQueryOptions) *goqu.Sele
 	}
 
 	if !options.WithDeleted {
-		q = q.Where(goqu.C(COLUMN_DELETED_AT).Gte(carbon.Now(carbon.UTC).ToDateTimeString()))
+		q = q.Where(goqu.C(COLUMN_DELETED_AT).Gt(carbon.Now(carbon.UTC).ToDateTimeString()))
 	}
 
 	return q

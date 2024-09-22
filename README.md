@@ -4,6 +4,12 @@ The Blind Index Store allows for creating blind index database tables for search
 
 It supports a wide range of custom transformers (recommended) for increased flexibility.
 
+## License
+
+This project is licensed under the GNU General Public License version 3 (GPL-3.0). You can find a copy of the license at https://www.gnu.org/licenses/gpl-3.0.en.html
+
+For commercial use, please use my [contact page](https://lesichkov.co.uk/contact) to obtain a commercial license.
+
 ## Usage
 
 1. Instantiate the blind index store, and add your transformer.

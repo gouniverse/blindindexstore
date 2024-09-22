@@ -10,6 +10,7 @@ type StoreInterface interface {
 	SearchValueSoftDelete(discount *SearchValue) error
 	SearchValueSoftDeleteByID(discountID string) error
 	SearchValueUpdate(value *SearchValue) error
+	Truncate() error
 }
 
 type SearchValueQueryOptions struct {

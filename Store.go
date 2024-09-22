@@ -283,6 +283,24 @@ func (store *Store) SearchValueUpdate(searchValue *SearchValue) error {
 	return err
 }
 
+func (store *Store) Truncate() error {
+	sqlStr, _, errSql := goqu.Dialect(store.dbDriverName).
+		Truncate(store.tableName).
+		ToSQL()
+
+	if errSql != nil {
+		return errSql
+	}
+
+	if store.debugEnabled {
+		log.Println(sqlStr)
+	}
+
+	_, err := store.db.Exec(sqlStr)
+
+	return err
+}
+
 func (store *Store) searchValueQuery(options SearchValueQueryOptions) *goqu.SelectDataset {
 	q := goqu.Dialect(store.dbDriverName).From(store.tableName)
 

@@ -8,7 +8,7 @@ import (
 
 	"github.com/doug-martin/goqu/v9"
 
-	"github.com/golang-module/carbon/v2"
+	"github.com/dromara/carbon/v2"
 	"github.com/gouniverse/sb"
 	"github.com/samber/lo"
 )
@@ -27,13 +27,13 @@ type Store struct {
 
 // AutoMigrate auto migrate
 func (st *Store) AutoMigrate() error {
-	sql := st.sqlTableCreate()
+	sqlStr := st.sqlTableCreate()
 
 	if st.debugEnabled {
-		log.Println(sql)
+		log.Println(sqlStr)
 	}
 
-	_, err := st.db.Exec(sql)
+	_, err := st.db.Exec(sqlStr)
 
 	if err != nil {
 		log.Println(err)
@@ -48,7 +48,7 @@ func (st *Store) EnableDebug(debug bool) {
 	st.debugEnabled = debug
 }
 
-func (store *Store) Search(needle string, searchType string) (refIDs []string, err error) {
+func (store *Store) Search(needle, searchType string) (refIDs []string, err error) {
 	q := store.searchValueQuery(SearchValueQueryOptions{
 		SearchValue: needle,
 		SearchType:  searchType,

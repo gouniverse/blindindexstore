@@ -11,7 +11,7 @@ import (
 )
 
 func initDB(filepath string) *sql.DB {
-	os.Remove(filepath) // remove database
+	_ = os.Remove(filepath) // remove database
 	dsn := filepath + "?parseTime=true"
 	db, err := sql.Open("sqlite", dsn)
 	if err != nil {

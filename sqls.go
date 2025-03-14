@@ -2,7 +2,7 @@ package blindindexstore
 
 import "github.com/gouniverse/sb"
 
-func (store *Store) sqlTableCreate() string {
+func (store *storeImplementation) sqlTableCreate() string {
 	sql := sb.NewBuilder(sb.DatabaseDriverName(store.db)).
 		Table(store.tableName).
 		Column(sb.Column{

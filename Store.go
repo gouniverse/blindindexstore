@@ -13,10 +13,10 @@ import (
 	"github.com/samber/lo"
 )
 
-var _ StoreInterface = (*Store)(nil) // verify it extends the interface
+var _ StoreInterface = (*storeImplementation)(nil) // verify it extends the interface
 
-// Store defines a session store
-type Store struct {
+// storeImplementation implements StoreInterface
+type storeImplementation struct {
 	tableName          string
 	db                 *sql.DB
 	dbDriverName       string
@@ -26,7 +26,7 @@ type Store struct {
 }
 
 // AutoMigrate auto migrate
-func (st *Store) AutoMigrate() error {
+func (st *storeImplementation) AutoMigrate() error {
 	sqlStr := st.sqlTableCreate()
 
 	if st.debugEnabled {
@@ -44,11 +44,11 @@ func (st *Store) AutoMigrate() error {
 }
 
 // EnableDebug - enables the debug option
-func (st *Store) EnableDebug(debug bool) {
+func (st *storeImplementation) EnableDebug(debug bool) {
 	st.debugEnabled = debug
 }
 
-func (store *Store) Search(needle, searchType string) (refIDs []string, err error) {
+func (store *storeImplementation) Search(needle, searchType string) (refIDs []string, err error) {
 	q := store.searchValueQuery(SearchValueQueryOptions{
 		SearchValue: needle,
 		SearchType:  searchType,
@@ -82,7 +82,7 @@ func (store *Store) Search(needle, searchType string) (refIDs []string, err erro
 
 // SearchValueCreate creates the record
 // Side effect! Transforms the value
-func (store *Store) SearchValueCreate(searchValue *SearchValue) error {
+func (store *storeImplementation) SearchValueCreate(searchValue *SearchValue) error {
 	searchValue.SetCreatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC))
 	searchValue.SetUpdatedAt(carbon.Now(carbon.UTC).ToDateTimeString(carbon.UTC))
 	searchValue.SetSearchValue(store.transformer.Transform(searchValue.SearchValue()))
@@ -114,7 +114,7 @@ func (store *Store) SearchValueCreate(searchValue *SearchValue) error {
 	return nil
 }
 
-func (store *Store) SearchValueDelete(searchValue *SearchValue) error {
+func (store *storeImplementation) SearchValueDelete(searchValue *SearchValue) error {
 	if searchValue == nil {
 		return errors.New("searchValue is nil")
 	}
@@ -122,7 +122,7 @@ func (store *Store) SearchValueDelete(searchValue *SearchValue) error {
 	return store.SearchValueDeleteByID(searchValue.ID())
 }
 
-func (store *Store) SearchValueDeleteByID(id string) error {
+func (store *storeImplementation) SearchValueDeleteByID(id string) error {
 	if id == "" {
 		return errors.New("searchValue id is empty")
 	}
@@ -146,7 +146,7 @@ func (store *Store) SearchValueDeleteByID(id string) error {
 	return err
 }
 
-func (store *Store) SearchValueFindByID(id string) (*SearchValue, error) {
+func (store *storeImplementation) SearchValueFindByID(id string) (*SearchValue, error) {
 	if id == "" {
 		return nil, errors.New("searchValue id is empty")
 	}
@@ -167,7 +167,7 @@ func (store *Store) SearchValueFindByID(id string) (*SearchValue, error) {
 	return nil, nil
 }
 
-func (store *Store) SearchValueFindBySourceReferenceID(sourceReferenceID string) (*SearchValue, error) {
+func (store *storeImplementation) SearchValueFindBySourceReferenceID(sourceReferenceID string) (*SearchValue, error) {
 	if sourceReferenceID == "" {
 		return nil, errors.New("searchValue objectID is empty")
 	}
@@ -188,7 +188,7 @@ func (store *Store) SearchValueFindBySourceReferenceID(sourceReferenceID string)
 	return nil, nil
 }
 
-func (store *Store) SearchValueList(options SearchValueQueryOptions) ([]SearchValue, error) {
+func (store *storeImplementation) SearchValueList(options SearchValueQueryOptions) ([]SearchValue, error) {
 	q := store.searchValueQuery(options)
 
 	sqlStr, _, errSql := q.Select().ToSQL()
@@ -217,7 +217,7 @@ func (store *Store) SearchValueList(options SearchValueQueryOptions) ([]SearchVa
 	return list, nil
 }
 
-func (store *Store) SearchValueSoftDelete(searchValue *SearchValue) error {
+func (store *storeImplementation) SearchValueSoftDelete(searchValue *SearchValue) error {
 	if searchValue == nil {
 		return errors.New("searchValue is nil")
 	}
@@ -227,7 +227,7 @@ func (store *Store) SearchValueSoftDelete(searchValue *SearchValue) error {
 	return store.SearchValueUpdate(searchValue)
 }
 
-func (store *Store) SearchValueSoftDeleteByID(id string) error {
+func (store *storeImplementation) SearchValueSoftDeleteByID(id string) error {
 	searchValue, err := store.SearchValueFindByID(id)
 
 	if err != nil {
@@ -239,7 +239,7 @@ func (store *Store) SearchValueSoftDeleteByID(id string) error {
 
 // SearchValueUpdate updates the record
 // Side effect! Transforms the value, use with caution
-func (store *Store) SearchValueUpdate(searchValue *SearchValue) error {
+func (store *storeImplementation) SearchValueUpdate(searchValue *SearchValue) error {
 	if searchValue == nil {
 		return errors.New("order is nil")
 	}
@@ -283,7 +283,12 @@ func (store *Store) SearchValueUpdate(searchValue *SearchValue) error {
 	return err
 }
 
-func (store *Store) Truncate() error {
+// IsAutomigrateEnabled returns whether automigrate is enabled
+func (st *storeImplementation) IsAutomigrateEnabled() bool {
+	return st.automigrateEnabled
+}
+
+func (store *storeImplementation) Truncate() error {
 	sqlStr, _, errSql := goqu.Dialect(store.dbDriverName).
 		Truncate(store.tableName).
 		ToSQL()
@@ -301,7 +306,7 @@ func (store *Store) Truncate() error {
 	return err
 }
 
-func (store *Store) searchValueQuery(options SearchValueQueryOptions) *goqu.SelectDataset {
+func (store *storeImplementation) searchValueQuery(options SearchValueQueryOptions) *goqu.SelectDataset {
 	q := goqu.Dialect(store.dbDriverName).From(store.tableName)
 
 	if options.ID != "" {

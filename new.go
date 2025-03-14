@@ -7,8 +7,8 @@ import (
 )
 
 // NewStore creates a new entity store
-func NewStore(opts NewStoreOptions) (*Store, error) {
-	store := &Store{
+func NewStore(opts NewStoreOptions) (StoreInterface, error) {
+	store := &storeImplementation{
 		tableName:          opts.TableName,
 		automigrateEnabled: opts.AutomigrateEnabled,
 		db:                 opts.DB,

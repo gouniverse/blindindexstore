@@ -35,8 +35,8 @@ func Test_Store_WithAutoMigrate(t *testing.T) {
 		t.Fatalf("automigrateEnabled: Expected [err] to be nill received [%v]", errAutomigrateFalse.Error())
 	}
 
-	if storeAutomigrateFalse.automigrateEnabled != false {
-		t.Fatalf("automigrateEnabled: Expected [false] received [%v]", storeAutomigrateFalse.automigrateEnabled)
+	if storeAutomigrateFalse.IsAutomigrateEnabled() != false {
+		t.Fatalf("automigrateEnabled: Expected [false] received [%v]", storeAutomigrateFalse.IsAutomigrateEnabled())
 	}
 
 	storeAutomigrateTrue, errAutomigrateTrue := NewStore(NewStoreOptions{
@@ -50,8 +50,8 @@ func Test_Store_WithAutoMigrate(t *testing.T) {
 		t.Fatalf("automigrateEnabled: Expected [err] to be nill received [%v]", errAutomigrateTrue.Error())
 	}
 
-	if storeAutomigrateTrue.automigrateEnabled != true {
-		t.Fatalf("automigrateEnabled: Expected [true] received [%v]", storeAutomigrateTrue.automigrateEnabled)
+	if storeAutomigrateTrue.IsAutomigrateEnabled() != true {
+		t.Fatalf("automigrateEnabled: Expected [true] received [%v]", storeAutomigrateTrue.IsAutomigrateEnabled())
 	}
 }
 

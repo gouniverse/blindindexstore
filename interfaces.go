@@ -1,6 +1,9 @@
 package blindindexstore
 
 type StoreInterface interface {
+	AutoMigrate() error
+
+	Search(needle, searchType string) (refIDs []string, err error)
 	SearchValueCreate(value *SearchValue) error
 	SearchValueDelete(value *SearchValue) error
 	SearchValueDeleteByID(valueID string) error
@@ -11,6 +14,9 @@ type StoreInterface interface {
 	SearchValueSoftDeleteByID(discountID string) error
 	SearchValueUpdate(value *SearchValue) error
 	Truncate() error
+
+	// IsAutomigrateEnabled returns whether automigrate is enabled
+	IsAutomigrateEnabled() bool
 }
 
 type SearchValueQueryOptions struct {

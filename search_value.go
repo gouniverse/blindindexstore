@@ -40,7 +40,7 @@ func (d *SearchValue) CreatedAt() string {
 	return d.Get(COLUMN_CREATED_AT)
 }
 
-func (d *SearchValue) CreatedAtCarbon() carbon.Carbon {
+func (d *SearchValue) CreatedAtCarbon() *carbon.Carbon {
 	createdAt := d.CreatedAt()
 	return carbon.Parse(createdAt)
 }
@@ -54,7 +54,7 @@ func (d *SearchValue) DeletedAt() string {
 	return d.Get(COLUMN_DELETED_AT)
 }
 
-func (d *SearchValue) DeletedAtCarbon() carbon.Carbon {
+func (d *SearchValue) DeletedAtCarbon() *carbon.Carbon {
 	deletedAt := d.DeletedAt()
 	return carbon.Parse(deletedAt)
 }
@@ -97,7 +97,7 @@ func (d *SearchValue) UpdatedAt() string {
 	return d.Get(COLUMN_UPDATED_AT)
 }
 
-func (d *SearchValue) UpdatedAtCarbon() carbon.Carbon {
+func (d *SearchValue) UpdatedAtCarbon() *carbon.Carbon {
 	updatedAt := d.UpdatedAt()
 	return carbon.Parse(updatedAt)
 }

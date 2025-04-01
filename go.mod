@@ -4,11 +4,11 @@ go 1.23.3
 
 require (
 	github.com/doug-martin/goqu/v9 v9.19.0
-	github.com/gouniverse/dataobject v0.3.0
+	github.com/gouniverse/dataobject v1.2.0
 	github.com/gouniverse/sb v0.8.0
 	github.com/gouniverse/uid v1.5.0
 	github.com/samber/lo v1.49.1
-	modernc.org/sqlite v1.36.0
+	modernc.org/sqlite v1.37.0
 )
 
 require (
@@ -18,7 +18,7 @@ require (
 )
 
 require (
-	github.com/dromara/carbon/v2 v2.5.4
+	github.com/dromara/carbon/v2 v2.6.1
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/georgysavva/scany v1.2.3 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -28,7 +28,7 @@ require (
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
-	modernc.org/libc v1.61.13 // indirect
+	modernc.org/libc v1.62.1 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
-	modernc.org/memory v1.8.2 // indirect
+	modernc.org/memory v1.9.1 // indirect
 )
